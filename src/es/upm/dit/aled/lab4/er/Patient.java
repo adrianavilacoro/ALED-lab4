@@ -130,16 +130,25 @@ public class Patient extends Thread {
 	 * movement is animated by the GUI and the index is increased by one.
 	 */
 	private void advanceProtocol() {
-		// TODO
+		EmergencyRoomGUI.getInstance().animateTransfer(this, this.protocol.get(indexProtocol));
+		this.location = this.protocol.get(indexProtocol).getTo();
+		this.indexProtocol ++; 
 	}
-
+/* es mejor si primero guardo el transfer haciendo al principio una linea
+ * Transfer transfer = this.protocol.get(indexProtocol)
+ * asi luego puedo solo utilizar transfer y no cambia por mucho que incremente indexProtocol
+ * como lo tengo hecho esta bien pero es peligroso si cambia el orden de las lineas
+ */
 	/**
 	 * Simulates the treatment of the Patient at its current location. Therefore,
 	 * the Patient must spend at this method the amount of time specified in such
 	 * Area.
 	 */
 	private void attendedAtLocation() {
-		// TODO
+		 try{ 
+			 Thread.sleep(this.location.getTime());
+		 } catch (Exception e) {
+		 }
 	}
 
 	/**
@@ -149,7 +158,11 @@ public class Patient extends Thread {
 	 */
 	@Override
 	public void run() {
-		// TODO
+		while(this.indexProtocol < protocol.size()) {
+			this.attendedAtLocation();
+			this.advanceProtocol();
+		}
+		EmergencyRoomGUI.getInstance().removePatient(this);
 	}
 
 }
