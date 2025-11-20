@@ -115,8 +115,25 @@ public class FASTAReaderThreads {
 	 *         pattern in the data.
 	 */
 	public List<Integer> search(byte[] pattern) {
-		// TODO
-		return null;
+		List <Integer> results = new ArrayList <>();
+		try{
+			int cores = Runtime.getRuntime().availableProcessors();
+			System.out.println("Using " + cores + " cores.");
+			int lo =0; 
+			int hi= content.length/cores;
+			ExecutorService executor = Executors.newFixedThreadPool(cores);
+			for(int i=0; i<cores; i++) {
+				FASTASearchCallable tarea = new FASTASearchCallable(this, lo, hi, pattern);
+				Future <List<Integer>> resultadoTarea = executor.submit(tarea);
+				results.addAll(resultadoTarea.get());
+				lo++;
+				hi++;
+				}
+			executor.shutdown();
+		} catch (Exception e) {			
+		}
+
+		return results;
 	}
 
 	public static void main(String[] args) {
