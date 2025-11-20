@@ -119,18 +119,29 @@ public class FASTAReaderThreads {
 		try{
 			int cores = Runtime.getRuntime().availableProcessors();
 			System.out.println("Using " + cores + " cores.");
+			int tamaño=  content.length/cores;
 			int lo =0; 
-			int hi= content.length/cores;
+			int hi= tamaño;
 			ExecutorService executor = Executors.newFixedThreadPool(cores);
 			for(int i=0; i<cores; i++) {
 				FASTASearchCallable tarea = new FASTASearchCallable(this, lo, hi, pattern);
 				Future <List<Integer>> resultadoTarea = executor.submit(tarea);
 				results.addAll(resultadoTarea.get());
-				lo++;
-				hi++;
+				lo+= tamaño;
+				hi+= tamaño;
 				}
+/* De esta forma no estoy maximizando el paralelismo porque espero a terminar la tarea 1 para guardar el resultado
+ * y empezar con la tarea 2. lo que tengo que hacer es guardar los future en un array
+ * Future<List<Integer>>[] futures = new Future[cores]; 
+ * DENTRO DEL FOR hago Future <List<Integer>> resultadoTarea = executor.submit(tarea);
+ * futures[i] = resultadoTarea;  ------ asi guardo cada tarea sin bloquear el resultado
+ * FUERA pongo todos los futures en el List, con otro bucle for
+ * for(int i=0; i<futures.length; i++)
+ *     results.addAll(futures[i].get());
+ */
 			executor.shutdown();
-		} catch (Exception e) {			
+		} catch (Exception e)  {			
+			e.printStackTrace();
 		}
 
 		return results;
